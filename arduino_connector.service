@@ -1,0 +1,10 @@
+[Unit]
+Description=Arduino connector service
+After=multi-user.target
+[Service]
+Type=simple
+Restart=always
+WorkingDirectory=/opt/solar/solar-connector
+ExecStart=/opt/solar/solar-connector/venv/bin/python3 main.py
+[Install]
+WantedBy=multi-user.target

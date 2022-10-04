@@ -1,0 +1,131 @@
+---
+  - name: "create solar directory"
+    hosts: localhost
+    connection: local
+    tasks:
+
+    - name: create directory
+      ansible.builtin.file:
+        path: /opt/solar
+        state: directory
+        mode: '0755'
+      become: yes
+
+    - name: Change file ownership and group
+      ansible.builtin.file:
+        path: /opt/solar
+        owner: '{{ ansible_user_id }}'
+        group: '{{ ansible_user_id }}'
+      become: yes
+
+  - name: "clone or pull repos"
+    hosts: localhost
+    connection: local
+    tasks:
+
+    - name: Git checkout boat-connector
+      ansible.builtin.git:
+        repo: 'https://github.com/mospolytech-solar-regatta/solar-boat-connector.git'
+        dest: /opt/solar/solar-boat-connector
+
+    - name: Git checkout connector
+      ansible.builtin.git:
+        repo: 'https://github.com/mospolytech-solar-regatta/solar-connector.git'
+        dest: /opt/solar/solar-connector
+
+
+  - name: "install deps"
+    hosts: localhost
+    connection: local
+    tasks:
+
+    - name: Install psycopg deps
+      apt:
+        name:
+          - libpq-dev
+          - python3-dev
+          - python3-virtualenv
+      become: yes
+
+    - name: Install psycopg2 module
+      ansible.builtin.pip:
+        name: psycopg2
+      become: yes
+
+    - name: Install redis
+      apt:
+        name:
+          - redis
+      become: yes
+
+    - name: Ensure that redis is started
+      ansible.builtin.service:
+        name: redis
+        state: started
+
+    - name: Install postgres
+      apt:
+        name:
+          - postgresql
+      become: yes
+
+    - name: Ensure that postgresql is started
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+
+  - name: "setup postgresql"
+    hosts: localhost
+    connection: local
+    tasks:
+
+    - name: "Create app database"
+      postgresql_db:
+        state: present
+        name: "{{ db_name }}"
+      become: yes
+      become_user: postgres
+
+    - name: "Create db user"
+      postgresql_user:
+        state: present
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+      become: yes
+      become_user: postgres
+
+    - name: "Grant db user access to app db"
+      postgresql_privs:
+        type: database
+        database: "{{ db_name }}"
+        roles: "{{ db_user }}"
+        grant_option: no
+        privs: all
+      become: yes
+      become_user: postgres
+
+  - name: "install solar-boat-connector requirements"
+    hosts: localhost
+    connection: local
+    tasks:
+
+    - name: check if virtualenv library already installed or not
+      ansible.builtin.stat:
+        path: /opt/solar/solar-boat-connector/venv
+      register: pip_virtualenv_installed
+
+    - name: Install virtualenv module
+      ansible.builtin.pip:
+        name: virtualenv
+      when: pip_virtualenv_installed.stat.exists == False
+
+    - name: Create Python3-virtual environment folder
+      ansible.builtin.file:
+        name: /opt/solar/solar-boat-connector/venv
+        state: directory
+
+    - name: Initiate virtualenv
+      ansible.builtin.pip:
+        virtualenv: /opt/solar/solar-boat-connector/venv
+        virtualenv_command: "python3 -m venv"
+        requirements: /opt/solar/solar-boat-connector/requirements.txt

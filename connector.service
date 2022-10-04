@@ -1,0 +1,14 @@
+[Unit]
+Description=connector service
+After=syslog.target network.target nss-lookup.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/solar/solar-boat-connector
+ExecReload=/opt/solar/solar-boat-connector/venv/bin/circusctl reload
+ExecStart=/opt/solar/solar-boat-connector/venv/bin/circusd circus.ini
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
