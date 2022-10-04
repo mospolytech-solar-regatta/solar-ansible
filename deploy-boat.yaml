@@ -39,12 +39,13 @@
     connection: local
     tasks:
 
-    - name: Install psycopg deps
+    - name: Install apt deps
       apt:
         name:
           - libpq-dev
           - python3-dev
           - python3-virtualenv
+          - snapd
       become: yes
 
     - name: Install psycopg2 module
@@ -73,6 +74,10 @@
       ansible.builtin.service:
         name: postgresql
         state: started
+
+    - name: Install virtualenv module
+      ansible.builtin.pip:
+        name: virtualenv
 
   - name: "setup postgresql"
     hosts: localhost
@@ -114,11 +119,6 @@
         path: /opt/solar/solar-boat-connector/venv
       register: pip_virtualenv_installed
 
-    - name: Install virtualenv module
-      ansible.builtin.pip:
-        name: virtualenv
-      when: pip_virtualenv_installed.stat.exists == False
-
     - name: Create Python3-virtual environment folder
       ansible.builtin.file:
         name: /opt/solar/solar-boat-connector/venv
@@ -129,3 +129,70 @@
         virtualenv: /opt/solar/solar-boat-connector/venv
         virtualenv_command: "python3 -m venv"
         requirements: /opt/solar/solar-boat-connector/requirements.txt
+
+  - name: "install solar-connector requirements"
+    hosts: localhost
+    connection: local
+    tasks:
+
+    - name: check if virtualenv library already installed or not
+      ansible.builtin.stat:
+        path: /opt/solar/solar-connector/venv
+      register: pip_virtualenv_installed
+
+    - name: Create Python3-virtual environment folder
+      ansible.builtin.file:
+        name: /opt/solar/solar-connector/venv
+        state: directory
+
+    - name: Initiate virtualenv
+      ansible.builtin.pip:
+        virtualenv: /opt/solar/solar-connector/venv
+        virtualenv_command: "python3 -m venv"
+        requirements: /opt/solar/solar-connector/requirements.txt
+
+  - name: "create services"
+    hosts: localhost
+    connection: local
+    tasks:
+
+    - name: Copy solar-connector file
+      ansible.builtin.copy:
+        src: arduino_connector.service
+        dest: /etc/systemd/system/arduino_connector.service
+      become: yes
+
+    - name: Copy file solar-boat-connector service file
+      ansible.builtin.copy:
+        src: connector.service
+        dest: /etc/systemd/system/connector.service
+      become: yes
+
+    - name: Just force systemd to reread configs (2.4 and above)
+      ansible.builtin.systemd:
+        daemon_reload: yes
+      become: yes
+
+    - name: Make sure connector service unit is running
+      ansible.builtin.systemd:
+        state: started
+        enabled: yes
+        name: connector.service
+      become: yes
+
+    - name: Make sure arduino_connector service unit is running
+      ansible.builtin.systemd:
+        state: started
+        enabled: yes
+        name: arduino_connector.service
+      become: yes
+
+  - name: "update monitor"
+    hosts: localhost
+    connection: local
+    tasks:
+
+    - name: Install monitor with option --channel=latest/edge
+      community.general.snap:
+        name: mospolytech-solar-monitor
+        channel: latest/edge
