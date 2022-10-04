@@ -109,7 +109,7 @@
       become: yes
       become_user: postgres
 
-  - name: "install solar-boat-connector requirements"
+  - name: "setup solar-boat-connector"
     hosts: localhost
     connection: local
     tasks:
@@ -130,7 +130,24 @@
         virtualenv_command: "python3 -m venv"
         requirements: /opt/solar/solar-boat-connector/requirements.txt
 
-  - name: "install solar-connector requirements"
+    - name: create .env file
+      ansible.builtin.copy:
+        src: /opt/solar/solar-boat-connector/example.env
+        dest: /opt/solar/solar-boat-connector/.env
+        force: no
+
+    - name: migrate db
+      ansible.builtin.command: venv/bin/alembic upgrade head
+      args:
+        chdir: /opt/solar/solar-boat-connector
+      environment:
+        POSTGRES_USER: '{{ db_user }}'
+        POSTGRES_DB: '{{ db_name }}'
+        POSTGRES_SERVER: 'localhost'
+        POSTGRES_PASSWORD: '{{ db_password }}'
+
+
+  - name: "setup solar-connector"
     hosts: localhost
     connection: local
     tasks:
@@ -150,6 +167,12 @@
         virtualenv: /opt/solar/solar-connector/venv
         virtualenv_command: "python3 -m venv"
         requirements: /opt/solar/solar-connector/requirements.txt
+
+    - name: create .env file
+      ansible.builtin.copy:
+        src: /opt/solar/solar-connector/example.env
+        dest: /opt/solar/solar-connector/.env
+        force: no
 
   - name: "create services"
     hosts: localhost
