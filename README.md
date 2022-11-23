@@ -11,7 +11,7 @@ $ sudo apt install ansible
 * install galaxy dependencies
 
 ```bash
-$ ansible-galaxy collection install -r requirements.txt
+$ ansible-galaxy collection install -r requirements.yaml
 ```
 
 * run command with environment variables for sudo password and postgres db, user and user password
