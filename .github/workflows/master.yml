@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: solar-infra-runner
+  IMAGE_NAME: ${{ github.repository }}/solar-infra-runner
 
 jobs:
   build-and-push-image:
