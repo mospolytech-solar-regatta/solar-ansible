@@ -1,4 +1,11 @@
-### solar-ansible
+# solar-ansible
+
+## dev setup
+```bash
+docker run --rm -v "/var/run/docker.sock:/var/run/docker.sock" --name "solar-infra-runner" ghcr.io/mospolytech-solar-regatta/solar-ansible/solar-infra-runner:latest
+```
+
+## production setup
 
 * install ansible
 
