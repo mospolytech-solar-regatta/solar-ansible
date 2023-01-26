@@ -12,6 +12,9 @@ env:
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
@@ -36,5 +39,5 @@ jobs:
           file: devenv/runner/Dockerfile
           context: .
           push: true
-          tags: latest,${{ steps.meta.outputs.tags }}
+          tags: ${{ env.IMAGE_NAME }}:latest,${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
