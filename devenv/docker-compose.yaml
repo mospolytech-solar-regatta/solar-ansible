@@ -2,15 +2,16 @@ version: '3.5'
 
 services:
   postgres:
-    container_name: postgres_container
+    container_name: solar_boat_postgres
     image: postgres
     environment:
       PGDATA: /data/postgres
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
+      POSTGRES_DB: solar-boat-db
     volumes:
-       - postgres:/data/postgres
+       - boat_postgres:/data/postgres
     ports:
       - "5433:5432"
     networks:
@@ -48,5 +49,5 @@ networks:
     driver: bridge
 
 volumes:
-    postgres:
+    boat_postgres:
     pgadmin:
