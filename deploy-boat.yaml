@@ -67,7 +67,7 @@
     - name: Install postgres
       apt:
         name:
-          - postgresql
+          - postgresql-15
       become: yes
 
     - name: Ensure that postgresql is started
