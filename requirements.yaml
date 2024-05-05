@@ -1,3 +1,4 @@
-- name: community.postgresql
-
-- name: community.general
+collections:
+  - name: community.postgresql
+  
+  - name: community.general
