@@ -98,6 +98,7 @@
         db: "{{ db_name }}"
         roles: "{{ db_user }}"
         grant_option: no
+        objs: public
         privs: ALL
       become: yes
       become_user: postgres
