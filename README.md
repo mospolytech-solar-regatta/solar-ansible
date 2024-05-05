@@ -15,6 +15,13 @@ $ sudo apt install software-properties-common
 $ sudo add-apt-repository --yes --update ppa:ansible/ansible
 $ sudo apt install ansible
 ```
+
+* clone repo
+```bash
+git clone https://github.com/mospolytech-solar-regatta/solar-ansible.git
+cd solar-ansible
+```
+
 * install galaxy dependencies
 
 ```bash
