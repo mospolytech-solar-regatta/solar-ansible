@@ -71,10 +71,6 @@
         name: postgresql
         state: started
 
-    - name: Install virtualenv module
-      ansible.builtin.pip:
-        name: virtualenv
-
   - name: "setup postgresql"
     hosts: localhost
     connection: local
