@@ -49,11 +49,6 @@
           - snapd
       become: yes
 
-    - name: Install psycopg2 module
-      ansible.builtin.pip:
-        name: psycopg2
-      become: yes
-
     - name: Install redis
       apt:
         name:
